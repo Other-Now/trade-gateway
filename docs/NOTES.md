@@ -92,7 +92,8 @@ A C++20 client gateway on Boost.Beast/Asio:
 - **The version row is a global lock.** Every config write takes the
   `config_version` row lock until commit.
   - Measured: 8 concurrent writers gave 1003 commits/s vs 1057 for one
-    writer. No gain at all: they serialise on that row through fsync.
+    writer locally. On CI, 3540 vs 2470: some gain from group commit, but every
+    write still takes that row lock.
   - Fine for config, which changes a few times a day. It would be wrong for
     anything hot. The fix is `pg_current_xact_id()` or a sequence instead of a
     counter row, which costs the "commit order == version order" property.
@@ -150,7 +151,9 @@ A C++20 client gateway on Boost.Beast/Asio:
     unexplained ~2 s maxima. That is a 4-vCPU WSL VM running gateway, mock and
     bench together.
   - Writes are async, so a stalled socket can't block the loop by design.
-  - Claim the memory result, not a latency result.
+  - **Resolved on CI** (uncontended runner): readers' p50 was 37 vs 39 µs and
+    p99 155 vs 169 µs, without vs with the stalled reader. No effect. The
+    local swings were host contention.
 
 ## 7. Binance specifics
 

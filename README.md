@@ -73,7 +73,7 @@ local: WSL2, 4 vCPUs, one laptop.
 | Config change: COMMIT → client sees new version, on **both** gateways | p50 **0.60 / 0.66 ms**, p99 1.2 / 1.3 ms (300 commits) |
 | Snapshot reload query (5 tables, one transaction) | p50 425 µs |
 | 1000 UPDATEs in one transaction | 1000 NOTIFYs → **1 reload** per gateway |
-| 1000 separate commits, 1 vs 8 concurrent writers | 1057 vs 1003 commits/s: the `config_version` row lock serialises config writes (by design) |
+| 1000 separate commits, 1 vs 8 concurrent writers | 1057 vs 1003 commits/s locally (no gain); 2470 vs 3540 on CI. Every write takes the `config_version` row lock, which caps config write throughput (fine for config) |
 | API key revoked while its socket is open | socket closed with 1008 in p50 **0.60 ms**, max 1.0 ms; 50/50 closed, 0/50 could reconnect |
 | Isolation: 5 accounts × 2 sockets (one per gateway) × 200 orders | 4000 exec events, **0 to the wrong account, 0 missing**; cross-account cancel → `unknown order`; unpermitted subscribe → `not permitted` |
 | LISTEN connection killed, limit tightened while it was down | resynced in **124 ms**, over-limit order **rejected** |
@@ -82,12 +82,23 @@ local: WSL2, 4 vCPUs, one laptop.
 | …same, control `--no-conflate` | RSS 16.0 → **34.5 MB in 20 s** and climbing |
 | Live Binance testnet `bookTicker` (BTCUSDT, ETHUSDT), 60 s | 67 updates, 0 reconnects, gateway rx → client p50 181 µs ([log](results/local/live-testnet.txt)) |
 
+**CI (GitHub Actions, ubuntu-24.04, [run 43010694552](https://github.com/Other-Now/trade-gateway/actions/runs/43010694552)).**
+The same checks all pass on CI. A less contended host gives lower numbers:
+
+| what | result |
+|---|---|
+| Risk reject / ack / exchange NEW / fill | p50 46 / 66 / 140 / 148 µs |
+| Config: COMMIT → client, 2 gateways | p50 0.31 / 0.32 ms |
+| Revoked key's socket closed | p50 0.45 ms |
+| Fan-out: other readers' latency (gateway rx → reader rx), 0 vs 1 stalled reader | p50 37 vs 39 µs, p99 155 vs 169 µs. A stalled reader does not slow the others. |
+| Stalled reader, conflation vs control | RSS 16.3 → 16.3 MB vs 16.2 → 24.5 MB in 10 s |
+
 **Not measured or not claimed:**
 - **Orders on the real testnet.** The path is written (`TG_API_KEY` /
   `TG_API_SECRET` enable it) but has not been run live; it needs a testnet
   key.
-- **A slow reader's effect on the other readers' tail latency.** The results
-  were inconclusive across runs; see `docs/NOTES.md` §6.
+- **A slow reader's effect on the other readers' tail latency, locally.** The
+  local results were noisy; the clean CI run is the one to quote (see above).
 
 ## Run it
 
