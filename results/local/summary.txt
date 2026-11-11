@@ -1,0 +1,70 @@
+host: 4 cpus, Linux 6.18.33.2-microsoft-standard-WSL2
+Wed Nov 11 11:12:12 UTC 2026
+== rtt
+rtt: 2000 sequential MARKET orders via 127.0.0.1:9001 (BTCUSDT)
+  risk reject (gateway only)         n=2000   p50=123      p90=161      p99=253      max=2337     us
+  ack (risk passed, sent upstream)   n=2000   p50=208      p90=303      p99=916      max=2484     us
+  exec NEW from exchange             n=2000   p50=434      p90=672      p99=1588     max=5118     us
+  exec TRADE (fill)                  n=2000   p50=469      p90=731      p99=1999     max=5904     us
+== config
+config: 300 committed UPDATEs, time from COMMIT returning to client seeing the new version
+  gateway 127.0.0.1:9001             n=300    p50=600      p90=776      p99=1211     max=2473     us
+    in-process trigger->applied p50=2123 p99=3199 us; snapshot query p50=425 p99=824 us
+  gateway 127.0.0.1:9002             n=300    p50=660      p90=805      p99=1329     max=1587     us
+    in-process trigger->applied p50=2173 p99=3294 us; snapshot query p50=472 p99=897 us
+== burst-seq
+burst: 1000 single-row commits from 1 concurrent writer(s) in 946 ms (1057 commits/s)
+  gateway 127.0.0.1:9001: reached v1304 (target v1304); NOTIFYs received 1000, snapshot reloads 1000
+  [PASS] gateway 127.0.0.1:9001 converged on final version
+  gateway 127.0.0.1:9002: reached v1304 (target v1304); NOTIFYs received 1000, snapshot reloads 1000
+  [PASS] gateway 127.0.0.1:9002 converged on final version
+== burst-par
+burst: 1000 single-row commits from 8 concurrent writer(s) in 997 ms (1003 commits/s)
+  gateway 127.0.0.1:9001: reached v2304 (target v2304); NOTIFYs received 1000, snapshot reloads 1000
+  [PASS] gateway 127.0.0.1:9001 converged on final version
+  gateway 127.0.0.1:9002: reached v2304 (target v2304); NOTIFYs received 1000, snapshot reloads 990
+  [PASS] gateway 127.0.0.1:9002 converged on final version
+== burst-txn
+burst: 1000 UPDATE statements in ONE transaction, 117 ms
+  gateway 127.0.0.1:9001: reached v3304 (target v3304); NOTIFYs received 1000, snapshot reloads 1
+  [PASS] gateway 127.0.0.1:9001 converged on final version
+  gateway 127.0.0.1:9002: reached v3304 (target v3304); NOTIFYs received 1000, snapshot reloads 1
+  [PASS] gateway 127.0.0.1:9002 converged on final version
+== revoke
+  close reason seen by client: The WebSocket stream was gracefully closed at both endpoints [boost.beast.websocket:1 at /home/chiku/tg-deps/root/usr/include/boost/beast/websocket/impl/read.hpp:707:17 in function 'void boost::beast::websocket::stream< <template-parameter-1-1>, <anonymous> >::read_some_op< <template-parameter-2-1>, <template-parameter-2-2> >::operator()(boost::beast::error_code, std::size_t, bool)'] / close: api key revoked or account disabled
+revoke: 50 keys revoked while their socket was open
+  COMMIT -> socket closed by gateway n=50     p50=603      p90=706      p99=1004     max=1004     us
+  [PASS] every revoked key's socket closed (0 left open)
+  [PASS] revoked key refused on reconnect (0 accepted)
+== isolation
+isolation: 5 accounts x 2 sockets (one per gateway), 200 orders each
+  exec events delivered 4000, ack errors 0
+  [PASS] events for another account: 0
+  [PASS] own orders missing NEW/TRADE on some socket: 0
+  [PASS] cancel of another account's order -> unknown order
+  [PASS] subscribe to unpermitted symbol -> not permitted
+== resync
+resync (tgw-a): listener killed, max_qty tightened 100 -> 0.0001 while disconnected
+  gateway reached v3407 123.6 ms after the commit
+  order for 0.001 BTC: rejected: qty exceeds max_qty
+  [PASS] gateway resynced and rejected the order
+== resync-control
+resync (tgw-b): listener killed, max_qty tightened 100 -> 0.0001 while disconnected
+  gateway still on v5 after 3 s (target v6): STALE
+  order for 0.001 BTC: ACCEPTED (limit violated)
+  [PASS] control gateway stayed stale and let the order through
+== fanout-baseline
+fanout: 4 readers + 0 stalled sockets, 20 s, mode=conflate
+  gateway rx -> reader rx            n=399366 p50=102      p90=190      p99=612      max=2156981  us
+  ticks delivered to readers 399366 (19968/s), sequence gaps seen by readers 0
+  gateway md_in 303329, md_conflated 1, slow_disconnects 0, rss start 15832 kB, peak 15992 kB
+== fanout-stalled
+fanout: 4 readers + 1 stalled sockets, 20 s, mode=conflate
+  gateway rx -> reader rx            n=345400 p50=150      p90=1719     p99=7675     max=2069157  us
+  ticks delivered to readers 345400 (17270/s), sequence gaps seen by readers 0
+  gateway md_in 263152, md_conflated 74771, slow_disconnects 0, rss start 15992 kB, peak 16008 kB
+== fanout-control
+fanout: 4 readers + 1 stalled sockets, 20 s, mode=no-conflate
+  gateway rx -> reader rx            n=380446 p50=131      p90=521      p99=5409     max=53744    us
+  ticks delivered to readers 380446 (19022/s), sequence gaps seen by readers 0
+  gateway md_in 289301, md_conflated 0, slow_disconnects 0, rss start 15980 kB, peak 34544 kB

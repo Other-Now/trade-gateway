@@ -1,0 +1,5 @@
+rtt: 2000 sequential MARKET orders via 127.0.0.1:9001 (BTCUSDT)
+  risk reject (gateway only)         n=2000   p50=123      p90=161      p99=253      max=2337     us
+  ack (risk passed, sent upstream)   n=2000   p50=208      p90=303      p99=916      max=2484     us
+  exec NEW from exchange             n=2000   p50=434      p90=672      p99=1588     max=5118     us
+  exec TRADE (fill)                  n=2000   p50=469      p90=731      p99=1999     max=5904     us

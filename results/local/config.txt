@@ -1,0 +1,5 @@
+config: 300 committed UPDATEs, time from COMMIT returning to client seeing the new version
+  gateway 127.0.0.1:9001             n=300    p50=600      p90=776      p99=1211     max=2473     us
+    in-process trigger->applied p50=2123 p99=3199 us; snapshot query p50=425 p99=824 us
+  gateway 127.0.0.1:9002             n=300    p50=660      p90=805      p99=1329     max=1587     us
+    in-process trigger->applied p50=2173 p99=3294 us; snapshot query p50=472 p99=897 us

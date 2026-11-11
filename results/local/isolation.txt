@@ -1,0 +1,6 @@
+isolation: 5 accounts x 2 sockets (one per gateway), 200 orders each
+  exec events delivered 4000, ack errors 0
+  [PASS] events for another account: 0
+  [PASS] own orders missing NEW/TRADE on some socket: 0
+  [PASS] cancel of another account's order -> unknown order
+  [PASS] subscribe to unpermitted symbol -> not permitted

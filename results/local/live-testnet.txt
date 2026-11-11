@@ -1,0 +1,6 @@
+live: Binance spot testnet bookTicker through the gateway for 60 s
+  BTCUSDT      50 updates (0.8/s)  last bid/ask 74004.83000000 / 74004.84000000
+  ETHUSDT      17 updates (0.3/s)  last bid/ask 2060.40000000 / 2060.41000000
+  gateway rx -> client rx            n=67     p50=181      p90=471      p99=976      max=976      us
+  upstream md reconnects 0
+  [PASS] received live market data

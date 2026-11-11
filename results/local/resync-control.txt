@@ -1,0 +1,4 @@
+resync (tgw-b): listener killed, max_qty tightened 100 -> 0.0001 while disconnected
+  gateway still on v5 after 3 s (target v6): STALE
+  order for 0.001 BTC: ACCEPTED (limit violated)
+  [PASS] control gateway stayed stale and let the order through

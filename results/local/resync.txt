@@ -1,0 +1,4 @@
+resync (tgw-a): listener killed, max_qty tightened 100 -> 0.0001 while disconnected
+  gateway reached v3407 123.6 ms after the commit
+  order for 0.001 BTC: rejected: qty exceeds max_qty
+  [PASS] gateway resynced and rejected the order

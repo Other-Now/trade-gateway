@@ -1,0 +1,40 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  build-test:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tg
+          POSTGRES_DB: tg
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5544:5432"]
+        options: --health-cmd pg_isready --health-interval 2s --health-retries 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: deps
+        run: sudo apt-get update && sudo apt-get install -y libboost1.83-dev libpq-dev libssl-dev postgresql-client cmake g++
+      - name: build
+        run: BUILD_DIR=$HOME/tg-build bash scripts/build.sh
+      - name: unit tests
+        run: $HOME/tg-build/tg-unit
+      - name: integration + benchmarks (mock exchange, 2 gateways, controls)
+        env:
+          PSQL: psql
+          N_RTT: "1000"
+          FAN_SECS: "10"
+        run: OUT=results/ci bash scripts/bench-all.sh
+      - name: summary
+        if: always()
+        run: |
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat results/ci/summary.txt >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -n 30 $HOME/tg-run/*.log || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-ci
+          path: results/ci

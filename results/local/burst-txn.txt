@@ -1,0 +1,5 @@
+burst: 1000 UPDATE statements in ONE transaction, 117 ms
+  gateway 127.0.0.1:9001: reached v3304 (target v3304); NOTIFYs received 1000, snapshot reloads 1
+  [PASS] gateway 127.0.0.1:9001 converged on final version
+  gateway 127.0.0.1:9002: reached v3304 (target v3304); NOTIFYs received 1000, snapshot reloads 1
+  [PASS] gateway 127.0.0.1:9002 converged on final version

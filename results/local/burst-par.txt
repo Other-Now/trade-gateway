@@ -1,0 +1,5 @@
+burst: 1000 single-row commits from 8 concurrent writer(s) in 997 ms (1003 commits/s)
+  gateway 127.0.0.1:9001: reached v2304 (target v2304); NOTIFYs received 1000, snapshot reloads 1000
+  [PASS] gateway 127.0.0.1:9001 converged on final version
+  gateway 127.0.0.1:9002: reached v2304 (target v2304); NOTIFYs received 1000, snapshot reloads 990
+  [PASS] gateway 127.0.0.1:9002 converged on final version

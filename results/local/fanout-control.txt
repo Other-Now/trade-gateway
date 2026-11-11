@@ -1,0 +1,4 @@
+fanout: 4 readers + 1 stalled sockets, 20 s, mode=no-conflate
+  gateway rx -> reader rx            n=380446 p50=131      p90=521      p99=5409     max=53744    us
+  ticks delivered to readers 380446 (19022/s), sequence gaps seen by readers 0
+  gateway md_in 289301, md_conflated 0, slow_disconnects 0, rss start 15980 kB, peak 34544 kB

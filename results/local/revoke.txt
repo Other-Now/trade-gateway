@@ -1,0 +1,5 @@
+  close reason seen by client: The WebSocket stream was gracefully closed at both endpoints [boost.beast.websocket:1 at /home/chiku/tg-deps/root/usr/include/boost/beast/websocket/impl/read.hpp:707:17 in function 'void boost::beast::websocket::stream< <template-parameter-1-1>, <anonymous> >::read_some_op< <template-parameter-2-1>, <template-parameter-2-2> >::operator()(boost::beast::error_code, std::size_t, bool)'] / close: api key revoked or account disabled
+revoke: 50 keys revoked while their socket was open
+  COMMIT -> socket closed by gateway n=50     p50=603      p90=706      p99=1004     max=1004     us
+  [PASS] every revoked key's socket closed (0 left open)
+  [PASS] revoked key refused on reconnect (0 accepted)
